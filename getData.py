@@ -1,6 +1,7 @@
 import requests
 import time
 from datetime import date
+from datetime import datetime, timedelta
 
 # config
 import os
@@ -51,9 +52,33 @@ def getDataFrom(lat, lon, time):
     post_id = data.insert_one(r.json()).inserted_id
 #r = 
 
-getDataFrom(42.3601,-71.0589,1420498800)
+#getDataFrom(42.3601,-71.0589,1420498800)
 
 # data range = 6669
+
+
+# convert date to unix timestamp, ignoring timezone (CDT/CST implicit)
+
+day = "2016-01-02"
+
+date = datetime.strptime(day, '%Y-%m-%d')
+
+
+unixtime = time.mktime(date.timetuple())
+
+print day+' is '+str(int(unixtime))
+
+#getWeatherDataWithin -l NWLatLong -r SELatLong -s StartDate - e EndDate
+l = (42.430426, -90.450439)
+#r = 
+# next, walk lat/long range by freqency and date.
+
+# a better way to do this may be to make an interval for the time range as well, so space and time sample resolution both have a scale factor. 
+# but for now, let's just do each day of the year. 
+
+#increment day day += timedelta(days=1)
+
+
 
 
 

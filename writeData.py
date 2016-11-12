@@ -41,3 +41,17 @@ print 'finding all'
 for i,d in enumerate(data.find()):
     print i
     print d
+    
+    # de-serialize json to CSV list.
+
+
+def writeToFile(string):
+    with open('output.csv', 'wb') as outfile:
+        outRow = string
+        # write new row
+        log.debug("wrote row")
+        outFileWriter.writerow(outRow)
+        outFileWriter.flush()
+        
+        
+writetoFile("hello world")
