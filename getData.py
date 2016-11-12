@@ -2,12 +2,29 @@ import requests
 import time
 from datetime import date
 
-# DB
+# config
+import os
+import sys
+import commands
+import ConfigParser
+config = ConfigParser.RawConfigParser()
+configFile = os.path.dirname(os.path.abspath(__file__))+'/config'
+config.readfp(open(configFile))
 
+
+# DB
 from pymongo import MongoClient
+client = MongoClient('localhost', 27017)  
+#client = MongoClient(config.get("data","host"), int(config.get("data","port")))
+db = client[config.get("data","db")]
+data = db[config.get("data","collection")]
+
+
+'''
 client = MongoClient('localhost', 27017)
 db = client['weather']
 data = db['darksky']
+'''
 
 #post_id = posts.insert_one(post).inserted_id
 
