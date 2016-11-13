@@ -26,7 +26,7 @@ data = db[config.get("data","collection")]
 # get from db
 #post_id = data.insert_one(r.json()).inserted_id
 
-print data.find_one()
+print data.find_one()['daily']['data'][0].keys()
 
 # let's get a whole bunch... 10x10 grid. 
 
@@ -38,20 +38,30 @@ print data.find_one()
 
 print 'finding all'
 
-for i,d in enumerate(data.find()):
-    print i
-    print d
+# open file
+
+def writeCSVfromDB():
+    with open('output_file.csv', 'wb') as outfile:
+        #write header
+        fieldNames = data.find_one()['daily']['data'][0].keys()
+        fieldNames.insert(0,"latitude")
+        fieldNames.insert(0,"longitude")
+        outFileWriter = csv.DictWriter(outfile, extrasaction='ignore', fieldnames=fieldNames)  
+        outFileWriter.writeheader()
+        # loop through 
+        for i,d in enumerate(data.find()):
+            print i
+            print d
+            print("wrote row")
+            row = d['daily']['data'][0]
+            row.update(d)
+            outFileWriter.writerow(d['daily']['data'][0])
+            #outFileWriter.flush()
     
     # de-serialize json to CSV list.
 
+        
+        
 
-def writeToFile(string):
-    with open('output.csv', 'wb') as outfile:
-        outRow = string
-        # write new row
-        log.debug("wrote row")
-        outFileWriter.writerow(outRow)
-        outFileWriter.flush()
         
-        
-writetoFile("hello world")
+writeCSVfromDB()
