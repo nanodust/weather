@@ -1,0 +1,35 @@
+---
+title: "CSC 465 group project data exploration"
+author: "Alexander Horn"
+date: "Nov 1 2016"
+output: pdf_document
+---
+```{r, include=FALSE,opts_chunk$set(out.width=4000,dpi=150,out.extra='keepaspectratio',fig.width=9, fig.height=8)}
+require("pairsD3")
+require("psych")
+require('ggplot2')
+library(corrgram)
+library(ggplot2)
+library(scales)
+library(psych)
+library(lubridate)
+library(knitr)
+library(gridExtra)
+library(corrplot)
+```
+
+
+```{r, include=FALSE}
+#w <- read.table("output_file.csv", header=TRUE, sep = ",")
+w <- read.csv("2010_5x5_grid_IL.csv",header=TRUE)
+
+# note this has 25 temperature locations around northern illinois
+names(w)
+# get rid of discrete/categorical variables / leave only continuous/numeric
+w<-w[,-8] #fortunately only 'Summary'
+dates <- w[,1]
+```
+
+plot(dates, w$temperatureMax)
+
+
