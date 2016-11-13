@@ -1,7 +1,12 @@
 import requests
 import time
-from datetime import date
-from datetime import datetime, timedelta
+#from datetime import date
+#from datetime import datetime
+#from datetime import timedelta as td
+
+from datetime import date, timedelta as td, datetime as datetime
+
+import numpy as np
 
 # config
 import os
@@ -15,8 +20,7 @@ config.readfp(open(configFile))
 
 # DB
 from pymongo import MongoClient
-client = MongoClient('localhost', 27017)  
-#client = MongoClient(config.get("data","host"), int(config.get("data","port")))
+client = MongoClient(config.get("data","host"), int(config.get("data","port")))
 db = client[config.get("data","db")]
 data = db[config.get("data","collection")]
 
@@ -50,26 +54,29 @@ def getDataFrom(lat, lon, time):
     print r.json()
     # write to db
     post_id = data.insert_one(r.json()).inserted_id
+    print("written to db")
 #r = 
 
-#getDataFrom(42.3601,-71.0589,1420498800)
+getDataFrom(42.3601,-71.0589,1420498800)
 
 # data range = 6669
 
 
 # convert date to unix timestamp, ignoring timezone (CDT/CST implicit)
 
+'''
 day = "2016-01-02"
 
 date = datetime.strptime(day, '%Y-%m-%d')
-
-
 unixtime = time.mktime(date.timetuple())
 
 print day+' is '+str(int(unixtime))
+'''
 
 #getWeatherDataWithin -l NWLatLong -r SELatLong -s StartDate - e EndDate
-l = (42.430426, -90.450439)
+l = (42.430426, -90.450439) # galena, IL
+r = (40.144108, -87.583008) # westville, IL
+
 #r = 
 # next, walk lat/long range by freqency and date.
 
@@ -78,9 +85,70 @@ l = (42.430426, -90.450439)
 
 #increment day day += timedelta(days=1)
 
+width = l[0]-r[0]
+height = l[1]-r[1]
+
+interval = 5.0
+
+print width 
+
+wfactor = width/interval
+hfactor = height/interval
+
+
+#print range(l[0],r[0],factor)
+
+longs = np.arange(r[0],l[0],wfactor)
+lats = np.arange(r[1],l[1],hfactor)
+
+print longs
+print lats
+
+'''
+def getWeatherForInterval(start, end):
+    day = start
+    while 1 :
+        date = datetime.strptime(day, '%Y-%m-%d')
+        unixtime = time.mktime(date.timetuple())
+        day += timedelta(days=1)
+        print day
+'''
 
 
 
+def getWeatherFromAllLocationsForADay(unixtime):
+    for i,l in enumerate(longs):
+        for j,la in enumerate(lats):
+            print("getting weather for "+str(l)+" "+str(la))+" on "+str(unixtime)
+            getDataFrom(l, la, unixtime)
+
+#getWeatherFromAllLocationsForADay(1293775200)
+
+#getWeatherForInterval("2016-01-01","2016-12-31")
+
+def getDaysForInterval():
+    d1 = date(2010, 1, 1)
+    d2 = date(2010, 12, 31)
+    delta = d2 - d1
+    for i in range(delta.days + 1):
+        day = d1 + td(days=i)
+        print day
+        dayt = datetime.strptime(str(day), '%Y-%m-%d')
+        unixtime = int(time.mktime(dayt.timetuple()))
+        print unixtime
+        getWeatherFromAllLocationsForADay(unixtime)
+
+getDaysForInterval()
+
+'''
+#neat 
+
+>>> from geopy.geocoders import Nominatim
+>>> geolocator = Nominatim()
+>>> location = geolocator.reverse("52.509669, 13.376294")
+>>> print(location.address)
+Berliner Mauer, Zimmerstrae, Mitte, Berlin, 10117, Deutschland
+'''
 
 
 
