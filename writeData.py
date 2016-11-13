@@ -2,6 +2,7 @@
 import requests
 import time
 from datetime import date
+from datetime import datetime, timedelta
 
 import csv
 
@@ -46,6 +47,7 @@ def writeCSVfromDB():
         fieldNames = data.find_one()['daily']['data'][0].keys()
         fieldNames.insert(0,"latitude")
         fieldNames.insert(0,"longitude")
+        fieldNames.insert(0,"date")
         outFileWriter = csv.DictWriter(outfile, extrasaction='ignore', fieldnames=fieldNames)  
         outFileWriter.writeheader()
         # loop through 
@@ -55,6 +57,8 @@ def writeCSVfromDB():
             print("wrote row")
             row = d['daily']['data'][0]
             row.update(d)
+            date = datetime.fromtimestamp(row['time']).strftime('%m/%d/%Y')
+            row.update({'date':date})
             outFileWriter.writerow(d['daily']['data'][0])
             #outFileWriter.flush()
     
