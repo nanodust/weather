@@ -3,6 +3,7 @@ import requests
 import time
 from datetime import date
 from datetime import datetime, timedelta
+import json, ast
 
 import csv
 
@@ -54,11 +55,12 @@ def writeCSVfromDB():
         for i,d in enumerate(data.find()):
             print i
             # de-serialize json to CSV row
-            row = d['daily']['data'][0]
+            row = ast.literal_eval(json.dumps(d['daily']['data'][0]))
+            #row = d['daily']['data'][0].encode('utf-8').strip()
             row.update(d)
             date = datetime.fromtimestamp(row['time']).strftime('%m/%d/%Y')
             row.update({'date':date})
-            outFileWriter.writerow(d['daily']['data'][0])
+            outFileWriter.writerow(row)
             #outFileWriter.flush()
 
 writeCSVfromDB()

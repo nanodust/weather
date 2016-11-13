@@ -47,7 +47,7 @@ unixtime = "1420498800"
 
 def getDataFrom(lat, lon, time):
     
-    getURL = baseURL+key+"/"+str(lat)+","+str(lon)+","+str(unixtime)+"?"+excludeString
+    getURL = baseURL+key+"/"+str(lat)+","+str(lon)+","+str(time)+"?"+excludeString
     print getURL
 
     r = requests.get(getURL)
@@ -57,7 +57,7 @@ def getDataFrom(lat, lon, time):
     print("written to db")
 #r = 
 
-getDataFrom(42.3601,-71.0589,1420498800)
+#getDataFrom(42.3601,-71.0589,1420498800)
 
 # data range = 6669
 
