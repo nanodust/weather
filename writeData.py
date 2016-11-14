@@ -4,6 +4,7 @@ import time
 from datetime import date
 from datetime import datetime, timedelta
 import json, ast
+from multiprocessing import Pool
 
 import csv
 
@@ -47,9 +48,10 @@ print 'finding all'
 # open file
 
 def writeCSVfromDB():
-    with open('output_file.csv', 'wb') as outfile:
+    with open(config.get("data","collection")+'.csv', 'wb') as outfile:
         #write header
         fieldNames = data.find_one()['daily']['data'][0].keys()
+        fieldNames.insert(0,"elevation")
         fieldNames.insert(0,"latitude")
         fieldNames.insert(0,"longitude")
         fieldNames.insert(0,"date")
@@ -59,29 +61,36 @@ def writeCSVfromDB():
         for i,d in enumerate(data.find()):
             print i
             # de-serialize json to CSV row
-            row = ast.literal_eval(json.dumps(d['daily']['data'][0]))
-            #row = d['daily']['data'][0].encode('utf-8').strip()
-            row.update(d)
-            date = datetime.fromtimestamp(row['time']).strftime('%m/%d/%Y')
-            row.update({'date':date})
-            outFileWriter.writerow(row)
+            if 'daily' in d:
+                row = ast.literal_eval(json.dumps(d['daily']['data'][0]))
+                #row = d['daily']['data'][0].encode('utf-8').strip()
+                row.update(d)
+                date = datetime.fromtimestamp(row['time']).strftime('%m/%d/%Y')
+                row.update({'date':date})
+                outFileWriter.writerow(row)
             #outFileWriter.flush()
+            else: 
+                print " no daily ? "
 
-### comment in to run
-#writeCSVfromDB()
+
 
 def writeElevationToMongo():
     for i,d in enumerate(data.find()):
         print i
+        print d['elevation']
+        print d['latitude']
         print d['_id']
-        h = getElevation(lat,long)
-        d.update({'elevation':h})
-        data.save(d)
-        #update d w/ {'elevation':h}
-        #d.update
-        print "updated record"
-        #if i > 5:
-        #    break
+        #if d['elevation'] is None:
+        if 1:
+            h = getElevation(d['latitude'],d['longitude'])
+            print "setting elevation "+str(h)
+            d['elevation'] = str(h)
+            data.save(d)
+            print "updated record"
+        print "didn't need to update"
+        print d['elevation']
+        if i == 15:
+            break
         
 # mycollection.update({'_id':mongo_id}, {"$set": post}, upsert=False)
 
@@ -91,13 +100,32 @@ def writeElevationToMongo():
     # then use it to update items in the existing collection
     # perhpas multiprocess 
 
+def mapElevation():
+    #allFiles = glob.glob(path+'rapidblue.action.*.sql')
+    allData = data.find()
+    numProc = 4
+    p = Pool(numProc)
+    print "mapping..."
+    p.map(getElevationWorker,allData)
+    
+def getElevationWorker(data):
+    for i,d in enumerate(data):
+        print i
+        print d['latitude']
+        print d['_id']
+        h = getElevation(d['latitude'],d['longitude'])
+        d.update_one({'elevation':h})
+        data.save(d)
+        print "updated record"
+    
+
 def getElevation(lat, lon):
     key = "97529b523e71d8d51576ce9bbb89a0ce"
     baseURL = "https://maps.googleapis.com/maps/api/elevation/json?locations="
     excludeString = "exclude=currently,minutely,hourly,flags"
-    lat = "42.3601"
-    lon = "-71.0589"
-    gkey = "AIzaSyBcq1h9jN7YsphDV_QQVlirwsoGy3d6EGk"
+    #lat = "42.3601"
+    #lon = "-71.0589"
+    gkey = "AIzaSyCF3UR0T6os4LWIZLsYbH2LNv2yQpzZqEk"
     unixtime = "1420498800"
     #getURL = baseURL+key+"/"+str(lat)+","+str(lat)+","+str(time)+"?"+excludeString
     
@@ -105,11 +133,12 @@ def getElevation(lat, lon):
     
     print getURL
 
+    
     r = requests.get(getURL)
     
     
     elevation = r.json()['results'][0]['elevation']
-    print elevation 
+    #print "elevation is "+ str(elevation)
     return elevation 
     # write to db
     #post_id = data.insert_one(r.json()).inserted_id
@@ -117,4 +146,12 @@ def getElevation(lat, lon):
 
 #getElevation(lat, lon)
 
-writeElevationToMongo()
+### comment in to run main export
+#
+writeCSVfromDB()
+
+
+### data modification 
+#
+#writeElevationToMongo()
+#mapElevation()

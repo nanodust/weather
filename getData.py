@@ -33,9 +33,9 @@ data = db['darksky']
 
 #post_id = posts.insert_one(post).inserted_id
 
-key = "97529b523e71d8d51576ce9bbb89a0ce"
-baseURL = "https://api.darksky.net/forecast/"
-excludeString = "exclude=currently,minutely,hourly,flags"
+key = config.get("darksky","key")
+baseURL =config.get("darksky","baseURL")
+excludeString = config.get("darksky","excludeString")
 lat = "42.3601"
 lon = "-71.0589"
 unixtime = "1420498800"
@@ -74,10 +74,21 @@ print day+' is '+str(int(unixtime))
 '''
 
 #getWeatherDataWithin -l NWLatLong -r SELatLong -s StartDate - e EndDate
-l = (42.430426, -90.450439) # galena, IL
-r = (40.144108, -87.583008) # westville, IL
 
-#r = 
+# first 5x5 
+
+#l = (42.430426, -90.450439) # galena, IL
+#sr = (40.144108, -87.583008) # westville, IL
+
+#  overall state
+l = (42.774739, -91.406250) # near cedar rapids
+r = (36.892252, -87.604980) # near clarksville KY
+
+# metro zoom
+#l = (42.774739, -91.406250) # nw of rockford
+#r = (40.669962, -87.429199) # se of peoria
+
+
 # next, walk lat/long range by freqency and date.
 
 # a better way to do this may be to make an interval for the time range as well, so space and time sample resolution both have a scale factor. 
@@ -88,7 +99,7 @@ r = (40.144108, -87.583008) # westville, IL
 width = l[0]-r[0]
 height = l[1]-r[1]
 
-interval = 5.0
+interval = 15.0
 
 print width 
 
@@ -126,16 +137,19 @@ def getWeatherFromAllLocationsForADay(unixtime):
 
 #getWeatherForInterval("2016-01-01","2016-12-31")
 
+#daySkip = 1 #daily
+daySkip = 7 #weekly
+
 def getDaysForInterval():
-    d1 = date(2010, 1, 1)
+    d1 = date(2010, 1, 1)   #1970, 1980, 1990, 2000, 2010
     d2 = date(2010, 12, 31)
     delta = d2 - d1
-    for i in range(delta.days + 1):
-        day = d1 + td(days=i)
+    for i in range(delta.days/daySkip):
+        day = d1 + td(days=i*daySkip)
         print day
         dayt = datetime.strptime(str(day), '%Y-%m-%d')
         unixtime = int(time.mktime(dayt.timetuple()))
-        print unixtime
+        #print unixtime
         getWeatherFromAllLocationsForADay(unixtime)
 
 getDaysForInterval()
