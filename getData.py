@@ -41,9 +41,6 @@ lon = "-71.0589"
 unixtime = "1420498800"
 
 #build string
-#requests.get('https://api.darksky.net/forecast/97529b523e71d8d51576ce9bbb89a0ce/42.3601,-71.0589,1420498800?exclude=currently,minutely,hourly,flags')
-
-
 
 def getDataFrom(lat, lon, time):
     
